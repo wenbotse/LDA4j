@@ -8,7 +8,7 @@ import com.hankcs.lda.LdaUtil;
 import com.travel.utils.ConfigTool;
 import com.travel.utils.FileUtils;
 
-public class TrainJob {
+public class ParallelTrainJob {
 	public static void main(String args[]) throws Exception {
 		int topic_num = Integer.parseInt(ConfigTool.props.getProperty("topic_num", "30"));
 		// 1. Load corpus from disk
@@ -17,7 +17,7 @@ public class TrainJob {
 		LdaGibbsSampler ldaGibbsSampler = new LdaGibbsSampler(
 				corpus.getDocument(), corpus.getVocabularySize());
 		// 3. Train it
-		ldaGibbsSampler.gibbs(topic_num);
+		ldaGibbsSampler.parallelGibbs(topic_num);
 		// 4. The phi matrix is a LDA model, you can use LdaUtil to explain it.
 		double[][] phi = ldaGibbsSampler.getPhi();
 		Map<String, Double>[] topicMap = LdaUtil.translate(phi,

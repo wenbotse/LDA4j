@@ -27,6 +27,10 @@ package com.hankcs.lda;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.travel.utils.ConfigTool;
 
@@ -41,6 +45,7 @@ import com.travel.utils.ConfigTool;
  */
 public class LdaGibbsSampler {
 
+	private ExecutorService exe = Executors.newFixedThreadPool(20);
 	/**
 	 * document data (term lists)<br>
 	 * 文档
@@ -175,6 +180,10 @@ public class LdaGibbsSampler {
 	public void initialState(int K) {
 		int M = documents.length;
 
+		System.out.println("V="+V);
+		System.out.println("K="+K);
+		System.out.println("M="+M);
+		
 		// initialise count variables. 初始化计数器
 		nw = new int[V][K];
 		nd = new int[M][K];
@@ -206,7 +215,9 @@ public class LdaGibbsSampler {
 	public void gibbs(int K) {
 		gibbs(K, 2.0, 0.5);
 	}
-
+	public void parallelGibbs(int K) {
+		parallelGibbs(K, 2.0, 0.5);
+	}
 	/**
 	 * Main method: Select initial state ? Repeat a large number of times: 1.
 	 * Select an element 2. Update conditional on other elements. If
@@ -242,7 +253,7 @@ public class LdaGibbsSampler {
 				+ THIN_INTERVAL + ").");
 
 		for (int i = 0; i < ITERATIONS; i++) {
-
+			long start = System.currentTimeMillis();
 			// for all z_i
 			for (int m = 0; m < z.length; m++) {
 				for (int n = 0; n < z[m].length; n++) {
@@ -253,7 +264,9 @@ public class LdaGibbsSampler {
 					z[m][n] = topic;
 				}
 			}
-
+			long end = System.currentTimeMillis();
+			
+			System.out.println("iter " + i + " cost time=" + (end - start));
 			if ((i < BURN_IN) && (i % THIN_INTERVAL == 0)) {
 				System.out.print("B");
 				dispcol++;
@@ -278,6 +291,73 @@ public class LdaGibbsSampler {
 		System.out.println();
 	}
 
+	public void parallelGibbs(int K, double alpha, double beta) {
+		this.K = K;
+		this.alpha = alpha;
+		this.beta = beta;
+
+		// init sampler statistics 分配内存
+		if (SAMPLE_LAG > 0) {
+			thetasum = new double[documents.length][K];
+			phisum = new double[K][V];
+			numstats = 0;
+		}
+
+		// initial state of the Markov chain:
+		initialState(K);
+
+		System.out.println("Sampling " + ITERATIONS
+				+ " iterations with burn-in of " + BURN_IN + " (B/S="
+				+ THIN_INTERVAL + ").");
+
+		for (int i = 0; i < ITERATIONS; i++) {
+			long start = System.currentTimeMillis();
+			// for all z_i
+			List<GibbsSampleTask> gtasks = new LinkedList<GibbsSampleTask>();
+			for (int m = 0; m < z.length; m++) {
+				GibbsSampleTask task = new GibbsSampleTask();
+				gtasks.add(task);
+				task.alpha = alpha;
+				task.beta = beta;
+				task.K = K;
+				task.V = V;
+				task.m = m;
+				task.init(m, nw, nd, nwsum, ndsum, documents, z);
+			}
+			try {
+				exe.invokeAll(gtasks);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			for(GibbsSampleTask task : gtasks){
+				task.done();
+			}
+			long end = System.currentTimeMillis();
+			
+			System.out.println("iter " + i + " cost time=" + (end - start));
+			if ((i < BURN_IN) && (i % THIN_INTERVAL == 0)) {
+				System.out.print("B");
+				dispcol++;
+			}
+			// display progress
+			if ((i > BURN_IN) && (i % THIN_INTERVAL == 0)) {
+				System.out.print("S");
+				dispcol++;
+			}
+			// get statistics after burn-in
+			if ((i > BURN_IN) && (SAMPLE_LAG > 0) && (i % SAMPLE_LAG == 0)) {
+				updateParams();
+				System.out.print("|");
+				if (i % THIN_INTERVAL != 0)
+					dispcol++;
+			}
+			if (dispcol >= 100) {
+				System.out.println();
+				dispcol = 0;
+			}
+		}
+		System.out.println();
+	}
 	/**
 	 * Sample a topic z_i from the full conditional distribution: p(z_i = j |
 	 * z_-i, w) = (n_-i,j(w_i) + beta)/(n_-i,j(.) + W * beta) * (n_-i,j(d_i) +
