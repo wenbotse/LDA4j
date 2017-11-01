@@ -50,6 +50,9 @@ public class TestCorpus extends TestCase
         // 5. TODO:Predict. I'm not sure whether it works, it is not stable.
         int[] document = Corpus.loadDocument("data/mini/军事_510.txt", corpus.getVocabulary());
         double[] tp = LdaGibbsSampler.inference(phi, document);
+        for(int i=0;i<tp.length;i++){
+        		System.out.println("topic "+i+" prob:"+tp);
+        }
         Map<String, Double> topic = LdaUtil.translate(tp, phi, corpus.getVocabulary(), 10);
         LdaUtil.explain(topic);
     }
