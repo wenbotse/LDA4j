@@ -97,8 +97,8 @@ public class Corpus {
 		Corpus corpus = new Corpus();
 		int progress = 0;
 		for (String line : FileUtils.readLinesFromFile(file)) {
-			if(progress%1000==0){
-				System.out.println("progress:"+progress++);
+			if((progress++) % 10 == 0){
+				System.out.println("progress:" + progress);
 			}
 			List<String> wordList = new LinkedList<String>();
 			String[] words = line.split(" ");

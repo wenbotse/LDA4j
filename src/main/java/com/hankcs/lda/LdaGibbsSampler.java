@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.travel.utils.ConfigTool;
+import com.travel.utils.FileUtils;
 
 /**
  * Gibbs sampler for estimating the best assignments of topics for words and
@@ -46,6 +47,8 @@ import com.travel.utils.ConfigTool;
 public class LdaGibbsSampler {
 
 	private ExecutorService exe = Executors.newFixedThreadPool(20);
+	private int iter_num_per_dump = Integer.parseInt(ConfigTool.props.getProperty("iter_num_per_dump", "10"));
+	private Corpus corpus;
 	/**
 	 * document data (term lists)<br>
 	 * 文档
@@ -287,10 +290,17 @@ public class LdaGibbsSampler {
 				System.out.println();
 				dispcol = 0;
 			}
+			
+			if(i % iter_num_per_dump == 0){
+				dump(i, corpus.getVocabulary(), getPhi());
+			}
 		}
 		System.out.println();
 	}
-
+	public void dump(int iter, Vocabulary vocabulary, double[][] phi){
+		FileUtils.writeObj2File("Vocabulary."+iter, vocabulary);
+		FileUtils.writeObj2File("phi."+iter, phi);
+	}
 	public void parallelGibbs(int K, double alpha, double beta) {
 		this.K = K;
 		this.alpha = alpha;
@@ -729,5 +739,13 @@ public class LdaGibbsSampler {
 			return "<" + x + ">";
 		}
 		return "[" + shades[a] + "]";
+	}
+
+	public Corpus getCorpus() {
+		return corpus;
+	}
+
+	public void setCorpus(Corpus corpus) {
+		this.corpus = corpus;
 	}
 }

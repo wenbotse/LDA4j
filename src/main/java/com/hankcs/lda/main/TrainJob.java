@@ -16,6 +16,7 @@ public class TrainJob {
 		// 2. Create a LDA sampler
 		LdaGibbsSampler ldaGibbsSampler = new LdaGibbsSampler(
 				corpus.getDocument(), corpus.getVocabularySize());
+		ldaGibbsSampler.setCorpus(corpus);
 		// 3. Train it
 		ldaGibbsSampler.gibbs(topic_num);
 		// 4. The phi matrix is a LDA model, you can use LdaUtil to explain it.
