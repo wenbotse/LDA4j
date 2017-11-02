@@ -33,9 +33,9 @@ public class Predictor {
 			System.out.println("topic " + p.k + " =" + p.v);
 		}
 
-		Map<String, Double>[] topics = LdaUtil.translate(idxs, phi, voc, 10);
-		for (int j = 0; j < 5; j++) {
-			System.out.println("topic "+idxs[j]);
+		Map<String, Double>[] topics = LdaUtil.translate(idxs, phi, voc, 20);
+		for (int j = 0; j < topics.length; j++) {
+			System.out.println("No."+ j +" topic "+idxs[j]);
 			LdaUtil.explain(topics[j]);
 		}
 	}

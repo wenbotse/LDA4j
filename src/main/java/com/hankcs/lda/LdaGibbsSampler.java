@@ -330,7 +330,7 @@ public class LdaGibbsSampler {
 				e.printStackTrace();
 			}
 			for(GibbsSampleTask task : gtasks){
-				task.done();
+				task.done(nw, nd, nwsum, ndsum, documents, z);;
 			}
 			long end = System.currentTimeMillis();
 			

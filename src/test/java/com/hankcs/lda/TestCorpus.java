@@ -11,49 +11,63 @@
  */
 package com.hankcs.lda;
 
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import com.travel.utils.CloneUtils;
+
 /**
  * @author hankcs
  */
-public class TestCorpus extends TestCase
-{
-    public void testAddDocument() throws Exception
-    {
-        List<String> doc1 = new ArrayList<String>();
-        doc1.add("hello");
-        doc1.add("word");
-        List<String> doc2 = new ArrayList<String>();
-        doc2.add("hankcs");
-        Corpus corpus = new Corpus();
-        corpus.addDocument(doc1);
-        corpus.addDocument(doc2);
-        System.out.println(corpus);
-    }
+public class TestCorpus extends TestCase {
+	public void testAddDocument() throws Exception {
+		List<String> doc1 = new ArrayList<String>();
+		doc1.add("hello");
+		doc1.add("word");
+		List<String> doc2 = new ArrayList<String>();
+		doc2.add("hankcs");
+		Corpus corpus = new Corpus();
+		corpus.addDocument(doc1);
+		corpus.addDocument(doc2);
+		System.out.println(corpus);
+	}
 
-    public void testAll() throws Exception
-    {
-        // 1. Load corpus from disk
-        Corpus corpus = Corpus.load("data/mini");
-        // 2. Create a LDA sampler
-        LdaGibbsSampler ldaGibbsSampler = new LdaGibbsSampler(corpus.getDocument(), corpus.getVocabularySize());
-        // 3. Train it
-        ldaGibbsSampler.gibbs(10);
-        // 4. The phi matrix is a LDA model, you can use LdaUtil to explain it.
-        double[][] phi = ldaGibbsSampler.getPhi();
-        Map<String, Double>[] topicMap = LdaUtil.translate(phi, corpus.getVocabulary(), 10);
-        LdaUtil.explain(topicMap);
-        // 5. TODO:Predict. I'm not sure whether it works, it is not stable.
-        int[] document = Corpus.loadDocument("data/mini/军事_510.txt", corpus.getVocabulary());
-        double[] tp = LdaGibbsSampler.inference(phi, document);
-        for(int i=0;i<tp.length;i++){
-        		System.out.println("topic "+i+" prob:"+tp);
-        }
-        Map<String, Double> topic = LdaUtil.translate(tp, phi, corpus.getVocabulary(), 10);
-        LdaUtil.explain(topic);
-    }
+	public void testAll() throws Exception {
+		// 1. Load corpus from disk
+		Corpus corpus = Corpus.load("data/mini");
+		// 2. Create a LDA sampler
+		LdaGibbsSampler ldaGibbsSampler = new LdaGibbsSampler(
+				corpus.getDocument(), corpus.getVocabularySize());
+		// 3. Train it
+		ldaGibbsSampler.gibbs(10);
+		// 4. The phi matrix is a LDA model, you can use LdaUtil to explain it.
+		double[][] phi = ldaGibbsSampler.getPhi();
+		Map<String, Double>[] topicMap = LdaUtil.translate(phi,
+				corpus.getVocabulary(), 10);
+		LdaUtil.explain(topicMap);
+		// 5. TODO:Predict. I'm not sure whether it works, it is not stable.
+		int[] document = Corpus.loadDocument("data/mini/军事_510.txt",
+				corpus.getVocabulary());
+		double[] tp = LdaGibbsSampler.inference(phi, document);
+		for (int i = 0; i < tp.length; i++) {
+			System.out.println("topic " + i + " prob:" + tp);
+		}
+		Map<String, Double> topic = LdaUtil.translate(tp, phi,
+				corpus.getVocabulary(), 10);
+		LdaUtil.explain(topic);
+	}
+
+	@Test
+	public void testArr() {
+		int[] arr = new int[]{1,2,3,4,5};
+		int[] arr2 = (int[])CloneUtils.deepClone(arr);
+		System.out.println(arr[0]);
+		arr2[0]++;
+		System.out.println(arr[0]);
+	}
 }
