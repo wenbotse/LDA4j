@@ -146,4 +146,23 @@ public class Corpus {
 		}
 		return result;
 	}
+	
+	public static int[] convertContent2Document(String content, Vocabulary vocabulary)
+			throws IOException {
+		List<Integer> wordList = new LinkedList<Integer>();
+		String[] words = content.split(" ");
+		for (String word : words) {
+			if (word.trim().length() < 2)
+				continue;
+			Integer id = vocabulary.getId(word);
+			if (id != null)
+				wordList.add(id);
+		}
+		int[] result = new int[wordList.size()];
+		int i = 0;
+		for (Integer integer : wordList) {
+			result[i++] = integer;
+		}
+		return result;
+	}
 }

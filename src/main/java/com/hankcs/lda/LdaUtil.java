@@ -11,7 +11,16 @@
  */
 package com.hankcs.lda;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import com.travel.utils.TravelUtils;
 
 /**
  * @author hankcs
@@ -72,7 +81,15 @@ public class LdaUtil {
 		}
 		return results;
 	}
-
+	public static Map<String, Double>[] translate(int[] tIdxs, double[][] phi,
+			Vocabulary vocabulary, int limit, Map<String, Double>[] topicMapArray) {
+		Map<String, Double>[] results = new HashMap[topicMapArray.length];
+		int i = 0;
+		for (int idx : tIdxs) {
+			results[i++] = topicMapArray[idx];
+		}
+		return results;
+	}
 	/**
 	 * To print the result in a well formatted form
 	 * 
@@ -87,9 +104,12 @@ public class LdaUtil {
 		}
 	}
 
-	public static void explain(Map<String, Double> topicMap) {
+	public static List<String> explain(Map<String, Double> topicMap) {
+		List<String> debugInfos = new LinkedList<String>();
 		for (Map.Entry<String, Double> entry : topicMap.entrySet()) {
 			System.out.println(entry);
+			debugInfos.add(entry.getKey()+"="+TravelUtils.processDoubleScale(entry.getValue(),6));
 		}
+		return debugInfos;
 	}
 }

@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import com.travel.utils.CloneUtils;
+import com.travel.utils.FileUtils;
 
 /**
  * @author hankcs
@@ -69,5 +70,15 @@ public class TestCorpus extends TestCase {
 		System.out.println(arr[0]);
 		arr2[0]++;
 		System.out.println(arr[0]);
+	}
+	
+	
+	@Test
+	public void testRegenVoc(){
+		Vocabulary vol = new Vocabulary();
+		com.hankcs.lda.Vocabulary voc = (com.hankcs.lda.Vocabulary) FileUtils.readOjbFromFile("config/Vocabulary");
+		vol.id2wordMap = voc.id2wordMap;
+		vol.word2idMap = voc.word2idMap;
+		FileUtils.writeObj2File("config/Vocabulary.re", vol);
 	}
 }
